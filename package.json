@@ -1,6 +1,6 @@
 {
   "name": "connection-test",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "test http service",
   "main": "connection-test.js",
   "repository": {

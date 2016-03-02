@@ -11,7 +11,7 @@ var cluster = require('cluster'),
 	i;
 
 program
-	.version('0.0.1')
+	.version('0.0.4')
 	.option('-i, --iteration [value]', 'iteration count', 100)
 	.option('-u, --url [value]', 'url')
 	.option('-s, --size [value]', 'block size', 150)
