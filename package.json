@@ -1,0 +1,26 @@
+{
+  "name": "connection-test",
+  "version": "0.0.3",
+  "description": "test http service",
+  "main": "connection-test.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yarkeev/connection-test.git"
+  },
+  "dependencies": {
+    "commander": "^2.8.1",
+    "request": "^2.58.0"
+  },
+  "bin": {
+    "connection-test": "./connection-test.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "http",
+    "test"
+  ],
+  "author": "denis.yarkeev@gmail.com",
+  "license": "MIT"
+}
