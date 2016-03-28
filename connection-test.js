@@ -28,17 +28,24 @@ if (cluster.isMaster) {
 	for (i in cluster.workers) {
 		workersPromises.push(new Promise(function (resolve) {
 			cluster.workers[i].on('message', function (msg) {
-				if (msg === 'done') {
-					resolve();
+				msg = JSON.parse(msg);
+
+				if (msg.cmd === 'done') {
+					resolve(msg.result);
 				}
 			});
 		}));
 	}
 
-	Promise.all(workersPromises).then(function () {
+	Promise.all(workersPromises).then(function (results) {
+		var summ = results.reduce(function(a, b) {
+			return a + b;
+		});
+
 		console.log('ALL DONE');
 		console.log('TOTAL: ', program.workers * program.iteration * program.size);
 		console.log('PER SECOND: ', program.workers * (program.size / (program.timeout / 1000)));
+		console.log('AVG TIME: ', Math.round(summ / program.workers) + 'ms');
 		process.exit(0);
 	});
 } else {
@@ -67,6 +74,7 @@ function batch() {
 	for (i = 0; i < program.size; i++) {
 		promises.push(new Promise(function (resolve) {
 			var time = Date.now(),
+				delta,
 				url = getUrl(),
 				child;
 
@@ -78,14 +86,16 @@ function batch() {
 						return this;
 					});
 					child.stdout.on('close', function () {
-						console.log('%s: %s - %s ms', ++total, url, Date.now() - time);
-						resolve();
+						delta = Date.now() - time;
+						console.log('%s: %s - %s ms', ++total, url, delta);
+						resolve(delta);
 					});
 				}
 			} else {
 				request.get(url, function (err, response, body) {
-					console.log('%s: %s - %s ms', ++total, url, Date.now() - time);
-					resolve();
+					delta = Date.now() - time;
+					console.log('%s: %s - %s ms', ++total, url, delta);
+					resolve(delta);
 				});
 			}
 		}));
@@ -94,8 +104,16 @@ function batch() {
 	if (iteration < program.iteration) {
 		setTimeout(batch, program.timeout);
 	} else {
-		Promise.all(promises).then(function () {
-			process.send('done');
+		Promise.all(promises).then(function (results) {
+			var summ = results.reduce(function(a, b) {
+					return a + b;
+				}),
+				avg = Math.round(summ / program.size);
+
+			process.send(JSON.stringify({
+				cmd: 'done',
+				result: avg
+			}));
 		});
 	}
 }
